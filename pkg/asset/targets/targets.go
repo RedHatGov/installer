@@ -13,6 +13,7 @@ import (
 	"github.com/openshift/installer/pkg/asset/templates/content/bootkube"
 	"github.com/openshift/installer/pkg/asset/templates/content/openshift"
 	"github.com/openshift/installer/pkg/asset/tls"
+	"github.com/openshift/installer/pkg/asset/airgap"
 )
 
 var (
@@ -59,6 +60,11 @@ var (
 		&bootstrap.Bootstrap{},
 		&cluster.Metadata{},
 	}
+
+        AirgapPackage = []asset.WritableAsset{
+                // LRC: Add exec to the offline.OfflinePackage target.  
+                &airgap.AirgapPackage{},
+        }
 
 	// Cluster are the cluster targeted assets.
 	Cluster = []asset.WritableAsset{

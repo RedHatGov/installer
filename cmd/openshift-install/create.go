@@ -80,6 +80,17 @@ var (
 		assets: targetassets.IgnitionConfigs,
 	}
 
+        airgapPackageTarget = target{
+                name: "Airgap Packages",
+                command: &cobra.Command{
+                        Use:   "airgap-package",
+                        Short: "Generates the airgap Package asset",
+                        // FIXME: add longer descriptions for our commands with examples for better UX.
+                        // Long:  "",
+                },
+                assets: targetassets.AirgapPackage,
+        }
+
 	clusterTarget = target{
 		name: "Cluster",
 		command: &cobra.Command{
@@ -141,10 +152,11 @@ var (
 		assets: targetassets.Cluster,
 	}
 
-	targets = []target{installConfigTarget, manifestsTarget, ignitionConfigsTarget, clusterTarget}
+	targets = []target{installConfigTarget, manifestsTarget, ignitionConfigsTarget, airgapPackageTarget, clusterTarget}
 )
 
 func newCreateCmd() *cobra.Command {
+	var ocp_ver string
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create part of an OpenShift cluster",
@@ -158,6 +170,9 @@ func newCreateCmd() *cobra.Command {
 		t.command.Run = runTargetCmd(t.assets...)
 		cmd.AddCommand(t.command)
 	}
+
+	cmd.PersistentFlags().StringVar(&ocp_ver, "ocp_ver", "4.6.8", "OpenShift version to package")
+	//viper.BindPFlag("ocp_ver", cmd.PersistentFlags().Lookup("ocp_ver"))
 
 	return cmd
 }
