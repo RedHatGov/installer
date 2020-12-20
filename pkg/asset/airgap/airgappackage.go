@@ -3,7 +3,7 @@ package airgap
 import (
 
         "fmt"
-	//"os"
+	"os"
 	//"github.com/ghodss/yaml"
 	"github.com/openshift/installer/pkg/asset"
 	//"github.com/openshift/installer/pkg/types"
@@ -31,6 +31,29 @@ func (a *AirgapPackage) Files() []*asset.File {
         return []*asset.File{}
 }
 
+func (a *AirgapPackage) createDirectories() (err error) {
+
+        e := os.MkdirAll(a.dest + "/registry", 0755)
+        if e != nil {
+                fmt.Println("Unable to create directory: " + a.dest + "/registry")
+                return e
+        }
+
+        e = os.MkdirAll(a.dest + "/rhcos", 0755)
+        if e != nil {
+                fmt.Println("Unable to create directory: " + a.dest + "/rhcos")
+                return e
+        }
+
+        e = os.MkdirAll(a.dest + "/clients", 0755)
+        if e != nil {
+                fmt.Println("Unable to create directory: " + a.dest + "/clients")
+                return e
+        }
+
+	return nil
+}
+
 // Load returns the installconfig from disk.
 func (a *AirgapPackage) Load(f asset.FileFetcher) (found bool, err error) {
 
@@ -42,15 +65,22 @@ func (a *AirgapPackage) Load(f asset.FileFetcher) (found bool, err error) {
 	a.dest = viper.GetString("dest")
 	a.pull_secret = viper.GetString("pull_secret")
 
+	e := a.createDirectories()
+        if e != nil {
+                fmt.Println("Unable to create directorys")
+                return false, e
+        }
+
 	rhcosMeta := &rhcosReleaseMetaData{}
-	//mirrorRelease := &mirrorReleaseMetaData{}
+	mirrorRelease := &mirrorReleaseMetaData{}
 
 	rhcosMeta.createAirgapPackage(a)
-	//rhcosMeta.createAirgapPackage(rhcos_ver, dest , platform)
-	//mirrorRelease.pullMirrorImages(ocp_ver, dest, pull_secret)
+	mirrorRelease.pullClusterImages(a)
+	mirrorRelease.pullRedHatOperators(a)
+	mirrorRelease.pullCertifiedOperators(a)
+	mirrorRelease.pullCommunityOperators(a)
 
 	//mirrorRelease.extractInstaller(config)
-	//isoImage.createISOImage(config.Ocpdistribution.Destdir, config.Ocpdistribution.Isofile)
 
 	return true, nil
 }

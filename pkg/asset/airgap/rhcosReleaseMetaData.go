@@ -62,15 +62,31 @@ func (a *rhcosReleaseMetaData) pullVmware(airPackage *AirgapPackage) bool {
 
 	fmt.Println("Downloading OVA")
 	ova := "rhcos-" + airPackage.rhcos_ver + "-x86_64-vmware.x86_64.ova"
-	err := os.MkdirAll(airPackage.dest + "/rhcos", 0755)
-	if err != nil {
-		fmt.Println("Unable to create directory: " + airPackage.dest + "/rhcos")
-		return false
-	}
 	DownloadFile(airPackage.dest + "/rhcos/" + ova, a.distributionURL + "rhcos-4.6.8-x86_64-vmware.x86_64.ova")
 
 	return true
 }
+
+func (a *rhcosReleaseMetaData) pullAWS(airPackage *AirgapPackage) bool {
+	return true
+}
+
+func (a *rhcosReleaseMetaData) pullAzure(airPackage *AirgapPackage) bool {
+        return true
+}
+
+func (a *rhcosReleaseMetaData) pullGCP(airPackage *AirgapPackage) bool {
+        return true
+}
+
+func (a *rhcosReleaseMetaData) pullOpenStack(airPackage *AirgapPackage) bool {
+        return true
+}
+
+func (a *rhcosReleaseMetaData) pullBareMetal(airPackage *AirgapPackage) bool {
+        return true
+}
+
 
 //func (a *rhcosReleaseMetaData) createAirgapPackage(rhcos_ver string, dest string, platform string) bool {
 func (a *rhcosReleaseMetaData) createAirgapPackage(airPackage *AirgapPackage) bool {

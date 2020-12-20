@@ -36,10 +36,12 @@ func (a *mirrorReleaseMetaData) Name() string {
 }
 
 
-func (a *mirrorReleaseMetaData) pullMirrorImages(ocp_ver string, dest string, pull_secret string) bool {
+func (a *mirrorReleaseMetaData) pullClusterImages(airPackage *AirgapPackage) bool {
 	fmt.Println("Pulling mirror images for OCP 4 mirror")
 
-	command := exec.Command("oc", "adm", "-a", pull_secret, "release", "mirror", releaseImage + ocp_ver + "-x86_64", "--to=file://openshift/release", dest + "/registry")
+	command := exec.Command("oc", "adm", "release", "mirror", "-a",
+		airPackage.pull_secret, releaseImage + airPackage.ocp_ver + "-x86_64",
+		"--to=file://openshift/release", "--to-dir=" + airPackage.dest + "/registry")
 
 	var out bytes.Buffer
 	command.Stdout = &out
@@ -53,3 +55,16 @@ func (a *mirrorReleaseMetaData) pullMirrorImages(ocp_ver string, dest string, pu
 
 	return true
 }
+
+func (a *mirrorReleaseMetaData) pullRedHatOperators(airPackage *AirgapPackage) bool {
+	return true
+}
+
+func (a *mirrorReleaseMetaData) pullCertifiedOperators(airPackage *AirgapPackage) bool {
+        return true
+}
+
+func (a *mirrorReleaseMetaData) pullCommunityOperators(airPackage *AirgapPackage) bool {
+        return true
+}
+
