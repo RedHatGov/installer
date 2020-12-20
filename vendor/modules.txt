@@ -988,6 +988,8 @@ github.com/libvirt/libvirt-go
 github.com/libvirt/libvirt-go-xml
 # github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de
 github.com/liggitt/tabwriter
+# github.com/magiconair/properties v1.8.2
+github.com/magiconair/properties
 # github.com/mailru/easyjson v0.7.6
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
@@ -1127,6 +1129,8 @@ github.com/packer-community/winrmcp/winrmcp
 # github.com/pborman/uuid v1.2.0
 ## explicit
 github.com/pborman/uuid
+# github.com/pelletier/go-toml v1.8.0
+github.com/pelletier/go-toml
 # github.com/peterbourgon/diskv v2.0.1+incompatible
 github.com/peterbourgon/diskv
 # github.com/pierrec/lz4 v2.2.6+incompatible
@@ -1187,16 +1191,25 @@ github.com/sirupsen/logrus
 # github.com/spf13/afero v1.3.5
 github.com/spf13/afero
 github.com/spf13/afero/mem
+# github.com/spf13/cast v1.3.1
+github.com/spf13/cast
 # github.com/spf13/cobra v1.1.1
 ## explicit
 github.com/spf13/cobra
+# github.com/spf13/jwalterweatherman v1.1.0
+github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
+# github.com/spf13/viper v1.7.1
+## explicit
+github.com/spf13/viper
 # github.com/stoewer/go-strcase v1.2.0
 github.com/stoewer/go-strcase
 # github.com/stretchr/testify v1.6.1
 ## explicit
 github.com/stretchr/testify/assert
+# github.com/subosito/gotenv v1.2.0
+github.com/subosito/gotenv
 # github.com/terraform-provider-openstack/terraform-provider-openstack v1.33.0
 ## explicit
 github.com/terraform-provider-openstack/terraform-provider-openstack/openstack

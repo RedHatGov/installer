@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -82,12 +83,7 @@ var (
 
         airgapPackageTarget = target{
                 name: "Airgap Packages",
-                command: &cobra.Command{
-                        Use:   "airgap-package",
-                        Short: "Generates the airgap Package asset",
-                        // FIXME: add longer descriptions for our commands with examples for better UX.
-                        // Long:  "",
-                },
+                command: newAirGapCmd(),
                 assets: targetassets.AirgapPackage,
         }
 
@@ -155,8 +151,29 @@ var (
 	targets = []target{installConfigTarget, manifestsTarget, ignitionConfigsTarget, airgapPackageTarget, clusterTarget}
 )
 
+func newAirGapCmd() *cobra.Command {
+	airCmd := &cobra.Command{
+		Use:   "airgap-package",
+		Short: "Generates the airgap Package asset",
+		// FIXME: add longer descriptions for our commands with examples for better UX.
+		// Long:  "",
+	}
+
+	airCmd.PersistentFlags().StringP("ocp_ver", "o", "OpenShift Version", "OpenShift version i.e; 4.6.8")
+	airCmd.PersistentFlags().StringP("rhcos_ver", "r", "RHCOS Version", "RHCOS version i.e; 4.6.8")
+	airCmd.PersistentFlags().StringP("plaform", "p", "Platform", "Platform i.e; aws, vmware, baremetal")
+	airCmd.PersistentFlags().StringP("dest", "d", "dest", "Package destination directory")
+	airCmd.PersistentFlags().StringP("pull_secret", "a", "pull_secret", "Pull Secret File")
+	viper.BindPFlag("ocp_ver", airCmd.PersistentFlags().Lookup("ocp_ver"))
+	viper.BindPFlag("rhcos_ver", airCmd.PersistentFlags().Lookup("rhcos_ver"))
+	viper.BindPFlag("platform", airCmd.PersistentFlags().Lookup("platform"))
+	viper.BindPFlag("dest", airCmd.PersistentFlags().Lookup("dest"))
+	viper.BindPFlag("pull_secret", airCmd.PersistentFlags().Lookup("pull_secret"))
+
+	return airCmd
+}
+
 func newCreateCmd() *cobra.Command {
-	var ocp_ver string
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create part of an OpenShift cluster",
@@ -170,9 +187,6 @@ func newCreateCmd() *cobra.Command {
 		t.command.Run = runTargetCmd(t.assets...)
 		cmd.AddCommand(t.command)
 	}
-
-	cmd.PersistentFlags().StringVar(&ocp_ver, "ocp_ver", "4.6.8", "OpenShift version to package")
-	//viper.BindPFlag("ocp_ver", cmd.PersistentFlags().Lookup("ocp_ver"))
 
 	return cmd
 }

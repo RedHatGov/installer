@@ -8,7 +8,7 @@ import (
 	"os"
 	"io"
 	//"path"
-	"log"
+	//"log"
 	//"time"
 	"github.com/openshift/installer/pkg/asset"
 	"github.com/openshift/installer/pkg/validate"
@@ -17,6 +17,9 @@ import (
 	"runtime"
 )
 
+const (
+	baseUrl = "https://mirror.openshift.com/pub/openshift-v4/"
+)
 
 type rhcosReleaseMetaData struct {
 	distributionURL string
@@ -33,6 +36,8 @@ func (a *rhcosReleaseMetaData) Dependencies() []asset.Asset {
 // write as it downloads and not load the whole file into memory.
 func DownloadFile(filepath string, url string) error {
 
+	fmt.Println("Downloading: " + url)
+
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
@@ -43,6 +48,7 @@ func DownloadFile(filepath string, url string) error {
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
+		fmt.Println("Failed to create: " + filepath)
 		return err
 	}
 	defer out.Close()
@@ -52,109 +58,33 @@ func DownloadFile(filepath string, url string) error {
 	return err
 }
 
-func pullVmware(baseUrl string) bool {
+func (a *rhcosReleaseMetaData) pullVmware(airPackage *AirgapPackage) bool {
 
-	DownloadFile("./rhcos-4.6.8-x86_64-vmware.x86_64.ova",baseUrl + "rhcos-4.6.8-x86_64-vmware.x86_64.ova")
+	fmt.Println("Downloading OVA")
+	ova := "rhcos-" + airPackage.rhcos_ver + "-x86_64-vmware.x86_64.ova"
+	err := os.MkdirAll(airPackage.dest + "/rhcos", 0755)
+	if err != nil {
+		fmt.Println("Unable to create directory: " + airPackage.dest + "/rhcos")
+		return false
+	}
+	DownloadFile(airPackage.dest + "/rhcos/" + ova, a.distributionURL + "rhcos-4.6.8-x86_64-vmware.x86_64.ova")
 
 	return true
 }
 
-func (a *rhcosReleaseMetaData) createAirgapPackage(dest string, platform string) bool {
-
-	err := os.Chdir(dest)
-
-	if err != nil {
-		log.Println(err)
-		return false
-	}
+//func (a *rhcosReleaseMetaData) createAirgapPackage(rhcos_ver string, dest string, platform string) bool {
+func (a *rhcosReleaseMetaData) createAirgapPackage(airPackage *AirgapPackage) bool {
 
 	fmt.Println("Downloading RHCOS bits for: ", runtime.GOARCH)
 
 	if runtime.GOARCH == "amd64" {
-		a.distributionURL="https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.6/4.6.8/"
+		a.distributionURL = baseUrl + "x86_64/dependencies/rhcos/4.6/" + airPackage.rhcos_ver + "/"
 	} else {
-		a.distributionURL="https://mirror.openshift.com/pub/openshift-v4/" + runtime.GOARCH + "/dependencies/rhcos/4.6/4.6.8/"
+		a.distributionURL= baseUrl + runtime.GOARCH + "/dependencies/rhcos/4.6/" + airPackage.rhcos_ver + "/"
 	}
 
-/*
-        versionString, err := version.Version()
-        if err != nil {
-                return false
-        }
-*/
-	pullVmware(a.distributionURL)
+	a.pullVmware(airPackage)
 
-/*
-        fmt.Printf("%s %s\n", os.Args[0], versionString)
-        if version.Commit != "" {
-                fmt.Printf("built from commit %s\n", version.Commit)
-        }
-        if image, err := releaseimage.Default(); err == nil {
-                fmt.Printf("release image %s\n", image)
-        }
-*/
-
-/*
-	res, err := http.Get(src)
-	check(err)
-	defer res.Body.Close()
-
-	u, err := url.Parse(src)
-	check(err)
-
-	fileName := dest + path.Base(u.Path)
-	fmt.Println(fileName)
-	out, err := os.Create(path.Base(u.Path))
-	defer out.Close()
-
-	size := res.ContentLength
-	bar := &Progbar{total: int(size)}
-	written := make(chan int, 500)
-
-	quit := make(chan bool)
-
-	go func() {
-		copied := 0
-		c := 0
-		tick := time.Tick(interval)
-
-		for {
-			select {
-			case c = <-written:
-				copied += c
-			case <-tick:
-				bar.PrintProg(copied)
-			case <-quit:
-				return		
-
-			}
-		}
-	}()
-
-	buf := make([]byte, 32*1024)
-	for {
-		rc, re := res.Body.Read(buf)
-		if rc > 0 {
-			wc, we := out.Write(buf[0:rc])
-			check(we)
-
-			if wc != rc {
-				log.Fatal("Read and Write count mismatch")
-			}
-
-			if wc > 0 {
-				written <- wc
-			}
-		}
-		if re == io.EOF {
-			break
-		}
-		check(re)
-	}
-
-	bar.PrintComplete()
-	quit <- true
-*/
 	return true
 }
 

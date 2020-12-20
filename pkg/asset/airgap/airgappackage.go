@@ -7,16 +7,17 @@ import (
 	//"github.com/ghodss/yaml"
 	"github.com/openshift/installer/pkg/asset"
 	//"github.com/openshift/installer/pkg/types"
-
-)
-
-const (
-	airgapConfigFilename = "airgap-config.yaml"
+        "github.com/spf13/viper"
 )
 
 type AirgapPackage struct {
         File   *asset.File          `json:"file"`
 	url    string
+	ocp_ver string
+	rhcos_ver string
+	platform string
+	dest string
+	pull_secret string
 }
 
 var _ asset.WritableAsset = (*AirgapPackage)(nil)
@@ -33,28 +34,21 @@ func (a *AirgapPackage) Files() []*asset.File {
 // Load returns the installconfig from disk.
 func (a *AirgapPackage) Load(f asset.FileFetcher) (found bool, err error) {
 
-	//file, err := f.FetchByName(airgapConfigFilename)
-	//if err != nil {
-	//	if os.IsNotExist(err) {
-	//		return false, nil
-	//	}
-	//	return false, err
-	//}
+	fmt.Println("Creating airgap package")
 
-	//config := &types.AirgapConfig{}
-	//if err := yaml.Unmarshal(file.Data, config); err != nil {
-	//	return false, err
-	//}
-
-	//fmt.Printf("Downloading RHCOS for architecture [%v]\n", config.Rhcos.Architecture)
+	a.ocp_ver = viper.GetString("ocp_ver")
+	a.rhcos_ver = viper.GetString("rhcos_ver")
+	//a.platform = viper.GetString("platform")
+	a.dest = viper.GetString("dest")
+	a.pull_secret = viper.GetString("pull_secret")
 
 	rhcosMeta := &rhcosReleaseMetaData{}
 	//mirrorRelease := &mirrorReleaseMetaData{}
-	//isoImage      := &isoImageMetaData{}
 
+	rhcosMeta.createAirgapPackage(a)
+	//rhcosMeta.createAirgapPackage(rhcos_ver, dest , platform)
+	//mirrorRelease.pullMirrorImages(ocp_ver, dest, pull_secret)
 
-	rhcosMeta.createAirgapPackage(".", "vmware")
-	//mirrorRelease.pullMirrorImages(config)
 	//mirrorRelease.extractInstaller(config)
 	//isoImage.createISOImage(config.Ocpdistribution.Destdir, config.Ocpdistribution.Isofile)
 
@@ -62,15 +56,15 @@ func (a *AirgapPackage) Load(f asset.FileFetcher) (found bool, err error) {
 }
 
 func (a *AirgapPackage) Generate(parents asset.Parents) error {
-        //rhcosRelease := &rhcosReleaseMetaData{}
+        rhcosRelease := &rhcosReleaseMetaData{}
 
         fmt.Println("Airgap Generate is being called")
-	//parents.Get(
-	//	rhcosRelease,
-	//)
-	////rhcosMetaData = &rhcosReleaseMetaData{}
+	parents.Get(
+		rhcosRelease,
+	)
+	//rhcosMetaData = &rhcosReleaseMetaData{}
 
-	//rhcosRelease.Generate(parents)
+	rhcosRelease.Generate(parents)
 
         return nil
 }
@@ -79,6 +73,7 @@ func (a *AirgapPackage) Generate(parents asset.Parents) error {
 func (a *AirgapPackage) Dependencies() []asset.Asset {
 	return []asset.Asset{
 		&rhcosReleaseMetaData{},
+                &mirrorReleaseMetaData{},
 	}
         fmt.Println("In the deps")
 	return nil
