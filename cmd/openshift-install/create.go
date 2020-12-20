@@ -161,14 +161,20 @@ func newAirGapCmd() *cobra.Command {
 
 	airCmd.PersistentFlags().StringP("ocp_ver", "o", "OpenShift Version", "OpenShift version i.e; 4.6.8")
 	airCmd.PersistentFlags().StringP("rhcos_ver", "r", "RHCOS Version", "RHCOS version i.e; 4.6.8")
-	airCmd.PersistentFlags().StringP("plaform", "p", "Platform", "Platform i.e; aws, vmware, baremetal")
+	//airCmd.PersistentFlags().StringP("plaform", "p", "Platform", "Platform i.e; aws, vmware, baremetal")
 	airCmd.PersistentFlags().StringP("dest", "d", "dest", "Package destination directory")
 	airCmd.PersistentFlags().StringP("pull_secret", "a", "pull_secret", "Pull Secret File")
+	airCmd.PersistentFlags().Bool("redhat_operators", false, "Add RedHat Operators to the package")
+	airCmd.PersistentFlags().Bool("certified_operators", false, "Add Certified Operators to the package")
+	airCmd.PersistentFlags().Bool("community_operators", false, "Add Community Operators to the package")
 	viper.BindPFlag("ocp_ver", airCmd.PersistentFlags().Lookup("ocp_ver"))
 	viper.BindPFlag("rhcos_ver", airCmd.PersistentFlags().Lookup("rhcos_ver"))
-	viper.BindPFlag("platform", airCmd.PersistentFlags().Lookup("platform"))
+	//viper.BindPFlag("platform", airCmd.PersistentFlags().Lookup("platform"))
 	viper.BindPFlag("dest", airCmd.PersistentFlags().Lookup("dest"))
 	viper.BindPFlag("pull_secret", airCmd.PersistentFlags().Lookup("pull_secret"))
+	viper.BindPFlag("redhat_operators", airCmd.PersistentFlags().Lookup("redhat_operators"))
+	viper.BindPFlag("certified_operators", airCmd.PersistentFlags().Lookup("certified_operators"))
+	viper.BindPFlag("community_operators", airCmd.PersistentFlags().Lookup("community_operators"))
 
 	return airCmd
 }
