@@ -51,6 +51,12 @@ func (a *AirgapPackage) createDirectories() (err error) {
                 return e
         }
 
+        e = os.MkdirAll(a.dest + "/manifests", 0755)
+        if e != nil {
+                fmt.Println("Unable to create directory: " + a.dest + "/manifests")
+                return e
+        }
+
 	return nil
 }
 
@@ -74,8 +80,8 @@ func (a *AirgapPackage) Load(f asset.FileFetcher) (found bool, err error) {
 	rhcosMeta := &rhcosReleaseMetaData{}
 	mirrorRelease := &mirrorReleaseMetaData{}
 
-	rhcosMeta.createAirgapPackage(a)
-	mirrorRelease.pullClusterImages(a)
+	//rhcosMeta.createAirgapPackage(a)
+	//mirrorRelease.pullClusterImages(a)
 
 	if viper.GetBool("redhat_operators") {
 		mirrorRelease.pullRedHatOperators(a)
@@ -88,6 +94,8 @@ func (a *AirgapPackage) Load(f asset.FileFetcher) (found bool, err error) {
 	if viper.GetBool("community_operators") {
 		mirrorRelease.pullCommunityOperators(a)
 	}
+
+        rhcosMeta.createAirgapPackage(a)
 
 	//mirrorRelease.extractInstaller(config)
 
