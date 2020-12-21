@@ -6,6 +6,7 @@ import (
         //"bytes"
         //"log"
         "os/exec"
+	"os"
 	"github.com/openshift/installer/pkg/asset"
 	//"bufio"
 	//"github.com/openshift/installer/pkg/types"
@@ -48,27 +49,16 @@ func (a *mirrorReleaseMetaData) pullClusterImages(airPackage *AirgapPackage) boo
 		airPackage.pull_secret, releaseImage + airPackage.ocp_ver + "-x86_64",
 		"--to=file://openshift/release", "--to-dir=" + airPackage.dest + "/registry")
 
-	//stdout, _ := command.StderrPipe()
-	command.Start()
-	//scanner := bufio.NewScanner(stdout)
-	//scanner.Split(bufio.ScanWords)
-	//for scanner.Scan() {
-	//	m := scanner.Text()
-	//	fmt.Print(m)
-	//}
-	command.Wait()
+	// Redirect command output
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
 
-/*
-	var out bytes.Buffer
-	command.Stdout = &out
 	err := command.Run()
 	if err != nil {
-		fmt.Println("Error occurred")
+		fmt.Println("Error mirroring cluster images")
 		fmt.Println(err.Error())
-		log.Fatal(err)
 	}
-	fmt.Printf("Command Output: %s\n", out.String())
-*/
+
 	return true
 }
 
@@ -77,6 +67,7 @@ func (a *mirrorReleaseMetaData) pullRedHatOperators(airPackage *AirgapPackage) b
         fmt.Println("Pulling Red Hat operators for package")
 
 	// Create the manifests for the redhat operators catalog
+	// TODO: Remove hard coded 4.6
 	args := "adm catalog mirror --registry-config " + airPackage.pull_secret
 	args += " " + rhOpIndex + "4.6 --manifests-only=true --to-manifests "
 	args += airPackage.dest + "/redhat_operators_manifests replaceme"
@@ -84,8 +75,10 @@ func (a *mirrorReleaseMetaData) pullRedHatOperators(airPackage *AirgapPackage) b
 	fmt.Println("Running: oc ", args)
 
 	command := exec.Command("oc", strings.Split(args, " ")...)
-	command.Start()
-	command.Wait()
+	command.Stdout = os.Stdout
+        command.Stderr = os.Stderr
+
+        command.Run()
 
 	// update the manifest on disk to point to our package registry location
 	read, err := ioutil.ReadFile(airPackage.dest+"/redhat_operators_manifests/mapping.txt")
@@ -98,8 +91,10 @@ func (a *mirrorReleaseMetaData) pullRedHatOperators(airPackage *AirgapPackage) b
 		panic(err)
 	}
 
+	//TODO: Remove hard coded amd64
 	args = "image mirror --dir=" + airPackage.dest + "/registry "
 	args += "--registry-config=" + airPackage.pull_secret
+	args += "--filter-by-os=linux/amd64 --skip-missing=true"
 	args += " --filename=" + airPackage.dest+"/redhat_operators_manifests/mapping.txt"
 
         fmt.Println("Running: oc ", args)

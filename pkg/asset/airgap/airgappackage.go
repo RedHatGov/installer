@@ -81,7 +81,7 @@ func (a *AirgapPackage) Load(f asset.FileFetcher) (found bool, err error) {
 	mirrorRelease := &mirrorReleaseMetaData{}
 
 	//rhcosMeta.createAirgapPackage(a)
-	//mirrorRelease.pullClusterImages(a)
+	mirrorRelease.pullClusterImages(a)
 
 	if viper.GetBool("redhat_operators") {
 		mirrorRelease.pullRedHatOperators(a)
